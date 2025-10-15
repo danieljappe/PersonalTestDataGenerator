@@ -3,13 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: php_backend_test_data
+    container_name: php_fake_info
     depends_on:
       - mariadb
     ports:
       - 8081:80
     volumes:
-      - .:/var/www/html
+      - .:/var/www/html/php_fake_info
 
   mariadb:
     image: mariadb:10.6.20
