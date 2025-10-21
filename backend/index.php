@@ -12,14 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     reportError(ERROR_METHOD);
 }
 
-$url = strtok($_SERVER['REQUEST_URI'], "?");    // GET parameters are removed
-// If there is a trailing slash, it is removed, so that it is not taken into account by the explode function
+$url = strtok($_SERVER['REQUEST_URI'], "?"); 
+
 if (substr($url, strlen($url) - 1) == '/') {
     $url = substr($url, 0, strlen($url) - 1);
 }
-// Everything up to the folder where this file exists is removed.
-// This allows the API to be deployed to any directory in the server
-$url = substr($url, strpos($url, basename(__DIR__)));
+
+if (strpos($url, '/php_fake_info') !== false) {
+    $url = substr($url, strpos($url, '/php_fake_info') + strlen('/php_fake_info'));
+} else {
+    $url = substr($url, strpos($url, basename(__DIR__)));
+}
 
 $urlPieces = explode('/', urldecode($url));
 
