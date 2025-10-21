@@ -1,0 +1,120 @@
+# Black and white box testing for 
+## "Return a fake CPR, first name, last name, gender and date of birth"
+### **1. Equivalence Partitioning**
+
+**Input Partitions:**
+
+Gender:
+- Valid: "M"/"Male", "F"/"Female", null/empty (random)
+- Invalid: "X", "123", special characters
+
+Birth Year (if range can be specified):
+- Valid: [1900-2024]
+- Invalid: <1900, >2024, future dates
+
+Output Partitions (validation of generated data):
+- CPR format: DDMMYY-XXXX
+- Gender in CPR: Odd last digit = male, even = female
+- Name: Only letters and spaces/hyphens
+
+**Test Cases:**
+| TC | Input | Expected Output Characteristics |
+|----|-------|--------------------------------|
+| 1 | Gender=M | CPR with odd last digit, male name |
+| 2 | Gender=F | CPR with even last digit, female name |
+| 3 | Gender=null | Random gender, matching CPR and name |
+| 4 | Gender="X" | Error message or default behavior |
+
+---
+
+### **2. Boundary Value Analysis**
+
+**CPR Number Boundaries:**
+```
+Date Part (DDMMYY):
+- Day: 01-31 (test: 00, 01, 31, 32)
+- Month: 01-12 (test: 00, 01, 12, 13)
+- Year: 00-99 (test different centuries)
+
+Serial Number Part (XXXX):
+- 0000-9999
+- Last digit: 0-9 (determines gender)
+
+Century Rules:
+- 0000-3699: 1900-1999
+- 3700-4999: 2000-2099
+- 5000-8999: 1900-1999
+- 9000-9999: 2000-2099
+```
+
+**Test Cases:**
+| TC | Focus | Test |
+|----|-------|------|
+| 5 | Min date | Verify 01-01 generates correctly |
+| 6 | Max date | Verify 31-12 generates correctly |
+| 7 | Leap year | 29-02 should only occur in leap years |
+| 8 | Gender boundary | Last digit 0,2,4,6,8 = female |
+| 9 | Gender boundary | Last digit 1,3,5,7,9 = male |
+
+---
+
+### **3. Decision Table Testing**
+
+**Conditions and Combinations:**
+```
+| TC | Gender Specified | Year Range Given | Name Type | Action |
+|----|-----------------|------------------|-----------|--------|
+| 10 | Yes (M) | Yes (1990-2000) | Danish | Generate male, CPR from 90s, Danish name |
+| 11 | Yes (F) | Yes (1990-2000) | Danish | Generate female, CPR from 90s, Danish name |
+| 12 | Yes (M) | No | International | Generate male, random year, int. name |
+| 13 | No | Yes (2000-2010) | Danish | Random gender, CPR from 00s |
+| 14 | No | No | Danish | Completely random, Danish name |
+```
+
+---
+
+### **4. State Transition Testing**
+
+**System States:**
+States:
+1. Initialization
+2. Parameter Received
+3. Generating CPR
+4. Generating Name
+5. Validating Consistency
+6. Returning Data
+
+Flows:
+Normal: 1 → 2 → 3 → 4 → 5 → 6 → 1
+Error: 2 → [invalid input] → 1
+Retry: 5 → [inconsistent] → 3
+
+**Test Cases:**
+| TC | Flow | Test |
+|----|------|------|
+| 15 | Normal | Successful generation first attempt |
+| 16 | Validation fail | CPR gender doesn't match name gender → retry |
+| 17 | Invalid input | Parameter error → error handling |
+
+---
+
+### **5. Use Case Testing**
+
+**Use Case: "Generate Test Data for System Testing"**
+
+**Main Flow:**
+1. System called without parameters
+2. Generate random birth date (1950-2005)
+3. Select random gender
+4. Generate CPR based on date and gender
+5. Select first name from gender-specific name list
+6. Select last name from surname list
+7. Return complete dataset
+
+**Alternative Flows:**
+3a. Specified gender is used
+3b. Invalid gender → default to random
+
+4a. Date is 29/2 in non-leap year → adjust to 28/2
+
+6a. Double surname generated (10% probability)
