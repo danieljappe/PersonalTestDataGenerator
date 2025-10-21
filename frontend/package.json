@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "esbuild": "^0.25.11",
+    "eslint-plugin-cypress": "^5.2.0"
+  },
+  "devDependencies": {
+    "cypress": "^15.4.0"
+  }
+}
