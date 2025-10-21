@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "c3ea11f4-d7e9-4986-984d-19feb409470e",
+		"name": "PersonalTestDataGenerator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32653320"
+	},
+	"item": [
+		{
+			"name": "Person",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Validate response status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Validate response time is less than 1000ms",
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"// Validate top-level properties in the response body",
+							"pm.test(\"Response has expected top-level properties\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an(\"object\");",
+							"    pm.expect(jsonData).to.have.property(\"CPR\");",
+							"    pm.expect(jsonData).to.have.property(\"firstName\");",
+							"    pm.expect(jsonData).to.have.property(\"lastName\");",
+							"    pm.expect(jsonData).to.have.property(\"gender\");",
+							"    pm.expect(jsonData).to.have.property(\"birthDate\");",
+							"    pm.expect(jsonData).to.have.property(\"address\");",
+							"    pm.expect(jsonData).to.have.property(\"phoneNumber\");",
+							"});",
+							"",
+							"// Validate 'address' property structure",
+							"pm.test(\"Address property has expected properties\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.address).to.be.an(\"object\");",
+							"    pm.expect(jsonData.address).to.have.property(\"street\");",
+							"    pm.expect(jsonData.address).to.have.property(\"number\");",
+							"    pm.expect(jsonData.address).to.have.property(\"floor\");",
+							"    pm.expect(jsonData.address).to.have.property(\"door\");",
+							"    pm.expect(jsonData.address).to.have.property(\"postal_code\");",
+							"    pm.expect(jsonData.address).to.have.property(\"town_name\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BACKEND_URL}}/person",
+					"host": [
+						"{{BACKEND_URL}}"
+					],
+					"path": [
+						"person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person Bulk",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Check response time is less than 1000ms",
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"// Parse response as JSON",
+							"let data = pm.response.json();",
+							"",
+							"// Validate response is an array",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(Array.isArray(data)).to.be.true;",
+							"});",
+							"",
+							"// Validate each item in the array",
+							"pm.test(\"Each item has required properties and address structure\", function () {",
+							"    data.forEach(function(item, idx) {",
+							"        pm.expect(item).to.be.an('object', `Item at index ${idx} is not an object`);",
+							"        pm.expect(item).to.have.property('CPR');",
+							"        pm.expect(item).to.have.property('firstName');",
+							"        pm.expect(item).to.have.property('lastName');",
+							"        pm.expect(item).to.have.property('gender');",
+							"        pm.expect(item).to.have.property('birthDate');",
+							"        pm.expect(item).to.have.property('address');",
+							"        pm.expect(item).to.have.property('phoneNumber');",
+							"        // Validate address structure",
+							"        pm.expect(item.address).to.be.an('object', `Address at index ${idx} is not an object`);",
+							"        pm.expect(item.address).to.have.property('street');",
+							"        pm.expect(item.address).to.have.property('number');",
+							"        pm.expect(item.address).to.have.property('floor');",
+							"        pm.expect(item.address).to.have.property('door');",
+							"        pm.expect(item.address).to.have.property('postal_code');",
+							"        pm.expect(item.address).to.have.property('town_name');",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BACKEND_URL}}/person?n=5",
+					"host": [
+						"{{BACKEND_URL}}"
+					],
+					"path": [
+						"person"
+					],
+					"query": [
+						{
+							"key": "n",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BACKEND_URL",
+			"value": ""
+		}
+	]
+}
