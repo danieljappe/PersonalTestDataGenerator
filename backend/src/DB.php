@@ -21,11 +21,12 @@ class DB {
         ];
 
         try {
-            $this->pdo = @new PDO($dsn, Info::$USER, Info::$PASSWORD, $options); 
+            $this->pdo = new PDO($dsn, Info::$USER, Info::$PASSWORD, $options); 
         } catch (\PDOException $e) {
-            echo 'Connection unsuccessful';
-            die('Connection unsuccessful: ' . $e->getMessage());
-            exit();
+            $errorMsg = 'Database connection failed: ' . $e->getMessage() . 
+                       ' (Host: ' . Info::$HOST . ', Port: ' . Info::$PORT . ', Database: ' . Info::$DB_NAME . ')';
+            error_log($errorMsg);
+            throw new \PDOException($errorMsg, $e->getCode(), $e);
         }
     }
 

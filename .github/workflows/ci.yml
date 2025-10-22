@@ -8,7 +8,7 @@ on:
 
 env:
   PHP_VERSION: '8.2'
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   COMPOSER_FLAGS: '--prefer-dist --no-progress --no-interaction'
 
 jobs:
@@ -59,20 +59,28 @@ jobs:
         run: composer install ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
 
-      - name: 🗄️ Load test database
-        run: |
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          
       - name: ⏳ Wait for database to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "Database is ready"
+              echo "✅ Database is ready"
               break
             fi
-            echo "Waiting for database... ($i/30)"
+            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
+          
+      - name: 🗄️ Load test database
+        run: |
+          echo "📥 Loading database schema and data..."
+          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
+          echo "✅ Database loaded successfully"
+          
+      - name: 🔍 Verify database setup
+        run: |
+          echo "🔍 Verifying database setup..."
+          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
+          echo "✅ Database verification complete"
 
       - name: 🧪 Run Unit Tests
         run: vendor/bin/phpunit tests/Unit --testdox
@@ -124,24 +132,47 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, pdo, pdo_mysql, json
 
-      - name: 🗄️ Load database
-        run: |
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          
       - name: ⏳ Wait for database to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "Database is ready"
+              echo "✅ Database is ready"
               break
             fi
-            echo "Waiting for database... ($i/30)"
+            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
+          
+      - name: 🗄️ Load database
+        run: |
+          echo "📥 Loading database schema and data..."
+          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
+          echo "✅ Database loaded successfully"
+          
+      - name: 🔍 Verify database setup
+        run: |
+          echo "🔍 Verifying database setup..."
+          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
+          echo "✅ Database verification complete"
 
       - name: 📦 Install backend dependencies
         run: composer install --no-dev ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
+
+      - name: 🧪 Test database connection
+        run: |
+          echo "🧪 Testing database connection from PHP..."
+          cd backend
+          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -r "
+          require_once 'src/DB.php';
+          try {
+            \$db = new DB();
+            echo '✅ Database connection successful';
+          } catch (Exception \$e) {
+            echo '❌ Database connection failed: ' . \$e->getMessage();
+            exit(1);
+          }
+          "
 
       - name: 🌐 Start PHP built-in server
         run: |
@@ -201,24 +232,47 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: 🗄️ Load database
-        run: |
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          
       - name: ⏳ Wait for database to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "Database is ready"
+              echo "✅ Database is ready"
               break
             fi
-            echo "Waiting for database... ($i/30)"
+            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
+          
+      - name: 🗄️ Load database
+        run: |
+          echo "📥 Loading database schema and data..."
+          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
+          echo "✅ Database loaded successfully"
+          
+      - name: 🔍 Verify database setup
+        run: |
+          echo "🔍 Verifying database setup..."
+          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
+          echo "✅ Database verification complete"
 
       - name: 📦 Install backend dependencies
         run: composer install --no-dev ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
+
+      - name: 🧪 Test database connection
+        run: |
+          echo "🧪 Testing database connection from PHP..."
+          cd backend
+          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -r "
+          require_once 'src/DB.php';
+          try {
+            \$db = new DB();
+            echo '✅ Database connection successful';
+          } catch (Exception \$e) {
+            echo '❌ Database connection failed: ' . \$e->getMessage();
+            exit(1);
+          }
+          "
 
       - name: 🌐 Start backend server
         run: |
