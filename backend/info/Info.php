@@ -14,6 +14,9 @@ class Info
         self::$DB_NAME = $_ENV['DB_NAME'] ?? 'addresses';
         self::$USER = $_ENV['DB_USER'] ?? 'root';
         self::$PASSWORD = $_ENV['DB_PASSWORD'] ?? 'password';
+        
+        // Debug logging
+        error_log("DB Configuration - HOST: " . self::$HOST . ", PORT: " . self::$PORT . ", DB: " . self::$DB_NAME);
     }
 }
 

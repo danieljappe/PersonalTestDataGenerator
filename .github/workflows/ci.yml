@@ -163,7 +163,16 @@ jobs:
         run: |
           echo "🧪 Testing database connection from PHP..."
           cd backend
-          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -r "
+          export DB_HOST=127.0.0.1
+          export DB_PORT=3306
+          export DB_NAME=addresses
+          export DB_USER=root
+          export DB_PASSWORD=password
+          echo "Environment variables set:"
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          php -r "
           require_once 'src/DB.php';
           try {
             \$db = new DB();
@@ -177,7 +186,14 @@ jobs:
       - name: 🌐 Start PHP built-in server
         run: |
           cd backend
-          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -S localhost:8081 &
+          export DB_HOST=127.0.0.1
+          export DB_PORT=3306
+          export DB_NAME=addresses
+          export DB_USER=root
+          export DB_PASSWORD=password
+          echo "Starting PHP server with environment variables:"
+          echo "DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_NAME=$DB_NAME"
+          php -S localhost:8081 &
           sleep 5
 
       - name: 🧪 Install Newman
@@ -263,7 +279,16 @@ jobs:
         run: |
           echo "🧪 Testing database connection from PHP..."
           cd backend
-          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -r "
+          export DB_HOST=127.0.0.1
+          export DB_PORT=3306
+          export DB_NAME=addresses
+          export DB_USER=root
+          export DB_PASSWORD=password
+          echo "Environment variables set:"
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          php -r "
           require_once 'src/DB.php';
           try {
             \$db = new DB();
@@ -277,7 +302,14 @@ jobs:
       - name: 🌐 Start backend server
         run: |
           cd backend
-          DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=addresses DB_USER=root DB_PASSWORD=password php -S localhost:8081 &
+          export DB_HOST=127.0.0.1
+          export DB_PORT=3306
+          export DB_NAME=addresses
+          export DB_USER=root
+          export DB_PASSWORD=password
+          echo "Starting PHP server with environment variables:"
+          echo "DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_NAME=$DB_NAME"
+          php -S localhost:8081 &
           sleep 5
 
       - name: 📦 Install frontend dependencies
