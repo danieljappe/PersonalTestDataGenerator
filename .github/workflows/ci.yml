@@ -344,10 +344,23 @@ jobs:
         continue-on-error: true
 
       - name: 🔍 SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectKey: danieljappesonarcloud
+          organization: danieljappe
+          args: >
+            -Dsonar.projectKey=danieljappesonarcloud
+            -Dsonar.organization=danieljappe
+            -Dsonar.sources=backend/src,frontend/js
+            -Dsonar.tests=backend/tests,frontend/cypress
+            -Dsonar.language=php,javascript
+            -Dsonar.php.coverage.reportPaths=backend/coverage.xml
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+            -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/vendor/**,**/node_modules/**
+            -Dsonar.coverage.exclusions=**/*.test.php,**/tests/**,**/vendor/**
 
   # Job 5: Static Analysis (Optional)
   static-analysis:
