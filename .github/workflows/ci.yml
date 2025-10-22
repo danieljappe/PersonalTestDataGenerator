@@ -316,49 +316,49 @@ jobs:
           name: cypress-videos
           path: frontend/cypress/videos
 
-  # Job 4: SonarCloud Analysis
-  sonarcloud:
-    name: Code Quality (SonarCloud)
-    runs-on: ubuntu-latest
-    needs: [backend-tests, api-tests, e2e-tests]
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for better analysis
-
-      - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ env.PHP_VERSION }}
-          coverage: xdebug
-
-      - name: 📦 Install PHP dependencies
-        run: composer install ${{ env.COMPOSER_FLAGS }}
-        working-directory: backend
-
-      - name: 📊 Generate coverage for SonarCloud
-        run: vendor/bin/phpunit --coverage-clover=coverage.xml
-        working-directory: backend
-        continue-on-error: true
-
-      - name: 🔍 SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=danieljappe_PersonalTestDataGenerator
-            -Dsonar.organization=danieljappesonarcloud
-            -Dsonar.sources=backend/src,frontend/js
-            -Dsonar.tests=backend/tests,frontend/cypress
-            -Dsonar.language=php,javascript
-            -Dsonar.php.coverage.reportPaths=backend/coverage.xml
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
-            -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/vendor/**,**/node_modules/**
-            -Dsonar.coverage.exclusions=**/*.test.php,**/tests/**,**/vendor/**
+  # Job 4: SonarCloud Analysis (Disabled - using Automatic Analysis instead)
+  # sonarcloud:
+  #   name: Code Quality (SonarCloud)
+  #   runs-on: ubuntu-latest
+  #   needs: [backend-tests, api-tests, e2e-tests]
+  #   
+  #   steps:
+  #     - name: 📥 Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0  # Shallow clones should be disabled for better analysis
+  #
+  #     - name: 🐘 Setup PHP
+  #       uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: ${{ env.PHP_VERSION }}
+  #         coverage: xdebug
+  #
+  #     - name: 📦 Install PHP dependencies
+  #       run: composer install ${{ env.COMPOSER_FLAGS }}
+  #       working-directory: backend
+  #
+  #     - name: 📊 Generate coverage for SonarCloud
+  #       run: vendor/bin/phpunit --coverage-clover=coverage.xml
+  #       working-directory: backend
+  #       continue-on-error: true
+  #
+  #     - name: 🔍 SonarCloud Scan
+  #       uses: SonarSource/sonarqube-scan-action@v5.0.0
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       with:
+  #         args: >
+  #           -Dsonar.projectKey=danieljappe_PersonalTestDataGenerator
+  #           -Dsonar.organization=danieljappe
+  #           -Dsonar.sources=backend/src,frontend/js
+  #           -Dsonar.tests=backend/tests,frontend/cypress
+  #           -Dsonar.language=php,javascript
+  #           -Dsonar.php.coverage.reportPaths=backend/coverage.xml
+  #           -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+  #           -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/vendor/**,**/node_modules/**
+  #           -Dsonar.coverage.exclusions=**/*.test.php,**/tests/**,**/vendor/**
 
   # Job 5: Static Analysis (Optional)
   static-analysis:
@@ -395,7 +395,7 @@ jobs:
   report:
     name: Test Report Summary
     runs-on: ubuntu-latest
-    needs: [backend-tests, api-tests, e2e-tests, sonarcloud, static-analysis]
+    needs: [backend-tests, api-tests, e2e-tests, static-analysis]
     if: always()
     
     steps:
