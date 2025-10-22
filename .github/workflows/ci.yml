@@ -349,10 +349,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectKey: danieljappesonarcloud
-          organization: danieljappe
           args: >
-            -Dsonar.projectKey=danieljappesonarcloud
+            -Dsonar.projectKey=danieljappe_PersonalTestDataGenerator
             -Dsonar.organization=danieljappe
             -Dsonar.sources=backend/src,frontend/js
             -Dsonar.tests=backend/tests,frontend/cypress
