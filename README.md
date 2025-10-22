@@ -1,5 +1,7 @@
 # Personal Test Data Generator
 
+## Sonarcloud Status
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=danieljappe_PersonalTestDataGenerator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=danieljappe_PersonalTestDataGenerator)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=danieljappe_PersonalTestDataGenerator&metric=coverage)](https://sonarcloud.io/summary/new_code?id=danieljappe_PersonalTestDataGenerator)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=danieljappe_PersonalTestDataGenerator&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=danieljappe_PersonalTestDataGenerator)
