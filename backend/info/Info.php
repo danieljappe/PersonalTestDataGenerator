@@ -1,24 +1,9 @@
 <?php
 class Info
 {
-    public static string $HOST;
-    public static string $PORT;
-    public static string $DB_NAME;
-    public static string $USER;
-    public static string $PASSWORD;
-    
-    public static function init(): void
-    {
-        self::$HOST = $_ENV['DB_HOST'] ?? 'mariadb';
-        self::$PORT = $_ENV['DB_PORT'] ?? '3306';
-        self::$DB_NAME = $_ENV['DB_NAME'] ?? 'addresses';
-        self::$USER = $_ENV['DB_USER'] ?? 'root';
-        self::$PASSWORD = $_ENV['DB_PASSWORD'] ?? 'password';
-        
-        // Debug logging
-        error_log("DB Configuration - HOST: " . self::$HOST . ", PORT: " . self::$PORT . ", DB: " . self::$DB_NAME);
-    }
+    public static string $HOST = '127.0.0.1';
+    public static string $PORT = '3306';
+    public static string $DB_NAME = 'addresses';
+    public static string $USER = 'root';
+    public static string $PASSWORD = 'password';
 }
-
-// Initialize when the class is loaded
-Info::init();
