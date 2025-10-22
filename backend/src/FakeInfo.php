@@ -54,10 +54,23 @@ class FakeInfo {
         if (!isset($this->firstName) || !isset($this->lastName) || (!isset($this->gender))){
             $this->setFullNameAndGender();
         }
-        // The CPR must end in an even number for females, odd for males
-        $finalDigit = mt_rand(0, 9);
-        if ($this->gender === self::GENDER_FEMININE && fmod($finalDigit, 2) === 1) {
-            $finalDigit++;
+        // CPR Gender Validation Fix:
+        // Danish CPR numbers must follow gender rules: females end with even digits, males with odd digits
+        // Previous implementation had issues:
+        // 1. Only handled female->odd conversion, not male->even conversion
+        // 2. Used modulo arithmetic that could cause edge cases (e.g., 9+1=10, 10%10=0)
+        // 3. Could result in incorrect gender validation in tests
+        //
+        // New approach: Direct selection from gender-appropriate digit arrays
+        // This guarantees correct gender validation and eliminates edge cases
+        if ($this->gender === self::GENDER_FEMININE) {
+            // Female CPRs must end with even digits: 0, 2, 4, 6, 8
+            $evenDigits = [0, 2, 4, 6, 8];
+            $finalDigit = $evenDigits[mt_rand(0, count($evenDigits) - 1)];
+        } else {
+            // Male CPRs must end with odd digits: 1, 3, 5, 7, 9
+            $oddDigits = [1, 3, 5, 7, 9];
+            $finalDigit = $oddDigits[mt_rand(0, count($oddDigits) - 1)];
         }
         
         $this->cpr = substr($this->birthDate, 8, 2) . 
