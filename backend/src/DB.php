@@ -14,7 +14,7 @@ class DB {
      * Opens a connection to the database
      */
     public function __construct() {
-        $dsn = 'mysql:host=' . Info::$HOST . ';dbname=' . Info::$DB_NAME . ';charset=utf8';
+        $dsn = 'mysql:host=' . Info::$HOST . ';port=' . Info::$PORT . ';dbname=' . Info::$DB_NAME . ';charset=utf8';
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
