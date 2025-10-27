@@ -82,9 +82,9 @@ class MockFakeInfo
         $mockPersons = [
             ['firstName' => 'Lars', 'lastName' => 'Nielsen', 'gender' => 'male'],
             ['firstName' => 'Anna', 'lastName' => 'Hansen', 'gender' => 'female'],
-            ['firstName' => 'Peter', 'lastName' => 'Andersen', 'gender' => 'male'],
+            ['firstName' => 'Lionel', 'lastName' => 'Andersen', 'gender' => 'male'],
             ['firstName' => 'Mette', 'lastName' => 'Jensen', 'gender' => 'female'],
-            ['firstName' => 'Søren', 'lastName' => 'Larsen', 'gender' => 'male'],
+            ['firstName' => 'Mohammed', 'lastName' => 'Larsen', 'gender' => 'male'],
             ['firstName' => 'Lise', 'lastName' => 'Petersen', 'gender' => 'female']
         ];
         
