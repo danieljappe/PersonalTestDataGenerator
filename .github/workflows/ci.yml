@@ -12,7 +12,6 @@ env:
   COMPOSER_FLAGS: '--prefer-dist --no-progress --no-interaction'
 
 jobs:
-  # Job 1: Backend Unit and Integration Tests
   backend-tests:
     name: Backend Tests (PHP)
     runs-on: ubuntu-latest
@@ -32,10 +31,10 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
@@ -43,66 +42,57 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: 📋 Get composer cache directory
+      - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         working-directory: backend
 
-      - name: 💾 Cache composer dependencies
+      - name: Cache composer dependencies
         uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: composer install ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
 
-      - name: ⏳ Wait for database to be ready
+      - name: Wait for database
         run: |
           for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "✅ Database is ready"
               break
             fi
-            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
           
-      - name: 🗄️ Load test database
-        run: |
-          echo "📥 Loading database schema and data..."
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          echo "✅ Database loaded successfully"
+      - name: Load database
+        run: mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
           
-      - name: 🔍 Verify database setup
-        run: |
-          echo "🔍 Verifying database setup..."
-          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
-          echo "✅ Database verification complete"
+      - name: Verify database setup
+        run: mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
 
-      - name: 🧪 Run Unit Tests
+      - name: Run Unit Tests
         run: vendor/bin/phpunit tests/Unit --testdox
         working-directory: backend
 
-      - name: 🔗 Run Integration Tests
+      - name: Run Integration Tests
         run: vendor/bin/phpunit tests/Integration/ApiSimplifiedTest.php --testdox
         working-directory: backend
 
-      - name: 📊 Generate test coverage
+      - name: Generate test coverage
         run: vendor/bin/phpunit --coverage-clover=coverage.xml --coverage-html=coverage-html
         working-directory: backend
         continue-on-error: true
 
-      - name: 📤 Upload coverage reports
+      - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: backend/coverage-html
         if: always()
 
-  # Job 2: API Tests with Postman/Newman
   api-tests:
     name: API Tests (Postman)
     runs-on: ubuntu-latest
@@ -123,82 +113,71 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, pdo, pdo_mysql, json
 
-      - name: ⏳ Wait for database to be ready
+      - name: Wait for database
         run: |
           for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "✅ Database is ready"
               break
             fi
-            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
           
-      - name: 🗄️ Load database
-        run: |
-          echo "📥 Loading database schema and data..."
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          echo "✅ Database loaded successfully"
+      - name: Load database
+        run: mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
           
-      - name: 🔍 Verify database setup
-        run: |
-          echo "🔍 Verifying database setup..."
-          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
-          echo "✅ Database verification complete"
+      - name: Verify database setup
+        run: mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
 
-      - name: 📦 Install backend dependencies
+      - name: Install backend dependencies
         run: composer install --no-dev ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
 
-      - name: 🧪 Test database connection
+      - name: Test database connection
         run: |
-          echo "🧪 Testing database connection from PHP..."
           cd backend
           php -r "
           require_once 'src/DB.php';
           try {
             \$db = new DB();
-            echo '✅ Database connection successful';
+            echo 'Database connection successful';
           } catch (Exception \$e) {
-            echo '❌ Database connection failed: ' . \$e->getMessage();
+            echo 'Database connection failed: ' . \$e->getMessage();
             exit(1);
           }
           "
 
-      - name: 🌐 Start PHP built-in server
+      - name: Start PHP server
         run: |
           cd backend
-          echo "Starting PHP server..."
           php -S localhost:8081 &
           sleep 5
 
-      - name: 🧪 Install Newman
+      - name: Install Newman
         run: npm install -g newman newman-reporter-htmlextra
 
-      - name: 🚀 Run Postman tests
+      - name: Run Postman tests
         run: |
           newman run postman/PersonalTestDataGenerator.postman_collection.json \
             --env-var "BACKEND_URL=http://localhost:8081/php_fake_info" \
             --reporters cli,htmlextra \
             --reporter-htmlextra-export postman-report.html
 
-      - name: 📤 Upload Postman report
+      - name: Upload Postman report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: postman-report
           path: postman-report.html
 
-  # Job 3: End-to-End Tests with Cypress
   e2e-tests:
     name: E2E Tests (Cypress)
     runs-on: ubuntu-latest
@@ -219,80 +198,70 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, pdo, pdo_mysql, json
 
-      - name: 🟢 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: ⏳ Wait for database to be ready
+      - name: Wait for database
         run: |
           for i in {1..60}; do
             if mysql -h 127.0.0.1 -u root -ppassword -e "SELECT 1" > /dev/null 2>&1; then
-              echo "✅ Database is ready"
               break
             fi
-            echo "⏳ Waiting for database... ($i/60)"
             sleep 2
           done
           
-      - name: 🗄️ Load database
-        run: |
-          echo "📥 Loading database schema and data..."
-          mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
-          echo "✅ Database loaded successfully"
+      - name: Load database
+        run: mysql -h 127.0.0.1 -u root -ppassword < backend/db/addresses.sql
           
-      - name: 🔍 Verify database setup
-        run: |
-          echo "🔍 Verifying database setup..."
-          mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
-          echo "✅ Database verification complete"
+      - name: Verify database setup
+        run: mysql -h 127.0.0.1 -u root -ppassword -e "USE addresses; SELECT COUNT(*) as town_count FROM postal_code;"
 
-      - name: 📦 Install backend dependencies
+      - name: Install backend dependencies
         run: composer install --no-dev ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
 
-      - name: 🧪 Test database connection
+      - name: Test database connection
         run: |
-          echo "🧪 Testing database connection from PHP..."
           cd backend
           php -r "
           require_once 'src/DB.php';
           try {
             \$db = new DB();
-            echo '✅ Database connection successful';
+            echo 'Database connection successful';
           } catch (Exception \$e) {
-            echo '❌ Database connection failed: ' . \$e->getMessage();
+            echo 'Database connection failed: ' . \$e->getMessage();
             exit(1);
           }
           "
 
-      - name: 🌐 Start backend server
+      - name: Start backend server
         run: |
           cd backend
-          echo "Starting PHP server..."
           php -S localhost:8081 &
           sleep 5
 
-      - name: 📦 Install frontend dependencies
+      - name: Install frontend dependencies
         run: npm install
         working-directory: frontend
 
-      - name: 🌐 Start frontend server
+      - name: Start frontend server
         run: |
           cd frontend
           npx http-server -p 8080 &
           sleep 5
 
-      - name: 🧪 Run Cypress tests
+      - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
@@ -302,48 +271,47 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
-      - name: 📤 Upload Cypress screenshots
+      - name: Upload Cypress screenshots
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: frontend/cypress/screenshots
 
-      - name: 📤 Upload Cypress videos
+      - name: Upload Cypress videos
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos
           path: frontend/cypress/videos
 
-  # Job 4: SonarCloud Analysis (Disabled - using Automatic Analysis instead)
   # sonarcloud:
   #   name: Code Quality (SonarCloud)
   #   runs-on: ubuntu-latest
   #   needs: [backend-tests, api-tests, e2e-tests]
   #   
   #   steps:
-  #     - name: 📥 Checkout code
+  #     - name: Checkout code
   #       uses: actions/checkout@v4
   #       with:
-  #         fetch-depth: 0  # Shallow clones should be disabled for better analysis
+  #         fetch-depth: 0
   #
-  #     - name: 🐘 Setup PHP
+  #     - name: Setup PHP
   #       uses: shivammathur/setup-php@v2
   #       with:
   #         php-version: ${{ env.PHP_VERSION }}
   #         coverage: xdebug
   #
-  #     - name: 📦 Install PHP dependencies
+  #     - name: Install PHP dependencies
   #       run: composer install ${{ env.COMPOSER_FLAGS }}
   #       working-directory: backend
   #
-  #     - name: 📊 Generate coverage for SonarCloud
+  #     - name: Generate coverage for SonarCloud
   #       run: vendor/bin/phpunit --coverage-clover=coverage.xml
   #       working-directory: backend
   #       continue-on-error: true
   #
-  #     - name: 🔍 SonarCloud Scan
+  #     - name: SonarCloud Scan
   #       uses: SonarSource/sonarqube-scan-action@v5.0.0
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -360,38 +328,36 @@ jobs:
   #           -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/vendor/**,**/node_modules/**
   #           -Dsonar.coverage.exclusions=**/*.test.php,**/tests/**,**/vendor/**
 
-  # Job 5: Static Analysis (Optional)
   static-analysis:
     name: Static Analysis
     runs-on: ubuntu-latest
     
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           tools: phpcs, phpstan, psalm
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: composer install ${{ env.COMPOSER_FLAGS }}
         working-directory: backend
 
-      - name: 🔍 Run PHP CodeSniffer
+      - name: Run PHP CodeSniffer
         run: vendor/bin/phpcs --standard=PSR12 src/ tests/
         working-directory: backend
         continue-on-error: true
 
-      - name: 🔍 Run PHPStan
+      - name: Run PHPStan
         run: |
           composer require --dev phpstan/phpstan
           vendor/bin/phpstan analyse src/ --level=5
         working-directory: backend
         continue-on-error: true
 
-  # Final Job: Report Summary
   report:
     name: Test Report Summary
     runs-on: ubuntu-latest
@@ -399,12 +365,12 @@ jobs:
     if: always()
     
     steps:
-      - name: 📥 Download all artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
 
-      - name: 📊 Generate summary
+      - name: Generate summary
         run: |
-          echo "## 📋 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
