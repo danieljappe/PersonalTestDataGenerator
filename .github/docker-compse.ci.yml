@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.6.20
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: addresses
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./backend/db/addresses.sql:/docker-entrypoint-initdb.d/addresses.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    environment:
+      DB_HOST: mariadb
+      DB_NAME: addresses
+      DB_USER: root
+      DB_PASSWORD: password
+    volumes:
+      - ./backend:/var/www/html/php_fake_info
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html

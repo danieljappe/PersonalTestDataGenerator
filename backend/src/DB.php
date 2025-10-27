@@ -14,18 +14,19 @@ class DB {
      * Opens a connection to the database
      */
     public function __construct() {
-        $dsn = 'mysql:host=' . Info::HOST . ';dbname=' . Info::DB_NAME . ';charset=utf8';
+        $dsn = 'mysql:host=' . Info::$HOST . ';port=' . Info::$PORT . ';dbname=' . Info::$DB_NAME . ';charset=utf8';
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ];
 
         try {
-            $this->pdo = @new PDO($dsn, Info::USER, Info::PASSWORD, $options); 
+            $this->pdo = new PDO($dsn, Info::$USER, Info::$PASSWORD, $options); 
         } catch (\PDOException $e) {
-            echo 'Connection unsuccessful';
-            die('Connection unsuccessful: ' . $e->getMessage());
-            exit();
+            $errorMsg = 'Database connection failed: ' . $e->getMessage() . 
+                       ' (Host: ' . Info::$HOST . ', Port: ' . Info::$PORT . ', Database: ' . Info::$DB_NAME . ')';
+            error_log($errorMsg);
+            throw new \PDOException($errorMsg, $e->getCode(), $e);
         }
     }
 

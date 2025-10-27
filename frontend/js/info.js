@@ -1,1 +1,1 @@
-export const baseUrl = "http://localhost:8081/php_fake_info";
+export const baseUrl = (typeof process !== 'undefined' && process.env && process.env.BACKEND_URL) || "http://localhost:8081/php_fake_info";

@@ -1,9 +1,9 @@
 <?php
-
 class Info
 {
-    public const HOST = 'mariadb';
-    public const DB_NAME = 'addresses';
-    public const USER = 'root';
-    public const PASSWORD = 'password';
+    public static string $HOST = '127.0.0.1';
+    public static string $PORT = '3306';
+    public static string $DB_NAME = 'addresses';
+    public static string $USER = 'root';
+    public static string $PASSWORD = 'password';
 }
