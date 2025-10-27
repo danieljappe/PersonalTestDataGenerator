@@ -2,7 +2,7 @@ This table describes the valid and invalid output partitions for the `FakeInfo` 
 
 | Field       | Valid Output | Invalid Output | Notes / Examples |
 |------------|--------------|----------------|----------------|
-| `street`    | Non-empty string, ≤ 40 characters, letters (a-z, A-Z) including Danish letters æ, ø, å, spaces allowed | Empty string, >40 characters, includes numbers or symbols | `"Brogade"`, `"Ågade"` |
+| `street`    | Non-empty string, 40 characters, letters (a-z, A-Z) including Danish letters æ, ø, å, spaces allowed | Empty string, != 40 characters, includes numbers or symbols | `"Brogade"`, `"Ågade"` |
 | `number`    | `"1"` to `"999"`, optionally followed by uppercase letter (`A-Z`) | `"0"`, `"1000"`, lowercase letters, symbols | `"43"`, `"12B"`, `"7K"` |
 | `floor`     | `"st"` or integer 1–99 | `"0"`, `"100"`, negative numbers, strings not equal `"st"` | `"st"`, `5`, `32` |
 | `door`      | `"th"`, `"tv"`, `"mf"`, integer 1–50, lowercase letter + 1–999, lowercase letter + '-' + 1–999 | uppercase letter only, numbers >50 (if numeric door), missing dash when required | `"th"`, `"tv"`, `"mf"`, `1`, `"a3"`, `"b-14"` |
